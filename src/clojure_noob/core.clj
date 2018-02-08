@@ -199,7 +199,7 @@
       (let [[f & r] p] ;; destructure p into first, rest
         (recur r (into result (set [f (do-match f)])))))))
 
-(defn which-part-hit?
+(defn which-part-hit? 
   "make body symmetrical,
   make a random number that is up to the sum of sizes for the entire body,
   recurse until the accumulated size of the body parts iterated through
@@ -208,7 +208,7 @@
   [b]
   (let [body (do-symmetry b), rnd (rand (reduce + (map :size body)))]
     (loop [[f & r] body, accumulator (:size f)]
-      (str "accum " accumulator)
+     
       (if (> accumulator rnd) ;; base case
         (str "Size " (f :size) " " (f :name) " was hit.")
         (recur r (+ accumulator (:size (first r))))))))
@@ -221,12 +221,43 @@
 (defn unify [h a]
   {:human h :animal a})
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; scratchpad
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def food-journal [{:month 3 :day 1 :human 4.2 :critter 3.3}
-                   {:month 3 :day 2 :human 4.0 :critter 3.8}
-                   {:month 4 :day 1 :human 3.7 :critter 3.9}
-                   {:month 4 :day 2 :human 3.7 :critter 3.6}])
+(defn hit [parts]
+  (let [body (finish-body parts), random (rand (reduce + (map :size body)))]
+   
+    (loop [[part & remaining] body, accumulator (:size part)]
+    
+      (if (> accumulator random)
+        (str "Hit " (:name part) ", size " (:size part))
+        
+        (recur remaining (+ accumulator (:size (first remaining))))))))
 
+(defn finish-body [parts]
+  (loop [p parts, result []]
+    
+    (if (empty? p)
+      result
+      
+      (let [[part & remaining] p]
+        (recur remaining (into result (set [part (need-match? part)])))))))
 
+(defn need-match? [part]
+  {:size (:size part) :name (str/replace (:name part) #"^left-" "right-")})
 
-
+(def start-parts
+  [{:name "head" :size 3}
+   {:name "mouth" :size 1}
+   {:name "nose" :size 1}
+   {:name "neck" :size 2}
+   {:name "chest" :size 10}
+   {:name "back" :size 10}
+   {:name "abdomen" :size 6}
+   {:name "left-eye" :size 1}
+   {:name "left-ear" :size 1}
+   {:name "left-arm" :size 5}
+   {:name "left-hand" :size 2}
+   {:name "left-leg" :size 6}
+   {:name "left-foot" :size 2}])
